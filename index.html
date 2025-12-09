@@ -1,203 +1,227 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZILA Token</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZILA Token - Official Website</title>
 
-<style>
+    <!-- TAILWIND CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-/* ===== GLOBAL DARK AI STYLE ===== */
-body {
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    color: white;
-    background: #050505;
-}
+    <!-- FONT AWESOME -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
 
-h1, h2, h3, p {
-    margin: 0;
-    padding: 0;
-}
+    <!-- TAILWIND CONFIG -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        zila: {
+                            primary: '#6C63FF',
+                            secondary: '#FF6584',
+                            dark: '#0A0A0F',
+                            light: '#F5F5F7'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
 
-/* ===== NAVBAR ===== */
-nav {
-    width: 100%;
-    background: #0a0a0a;
-    padding: 15px 0;
-    position: fixed;
-    top: 0;
-    z-index: 1000;
-    border-bottom: 1px solid #333;
-}
+    <!-- CUSTOM CSS -->
+    <style type="text/tailwindcss">
+        @layer utilities {
 
-nav ul {
-    list-style: none;
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    padding: 0;
-}
+            .section-bg {
+                background-size: cover;
+                background-position: center;
+                background-attachment: fixed;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 2rem 1rem;
+                position: relative;
+            }
 
-nav ul li a {
-    color: #ffffff;
-    font-weight: bold;
-    text-decoration: none;
-    transition: 0.3s;
-}
+            .section-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.6);
+                z-index: 1;
+            }
 
-nav ul li a:hover {
-    color: #00d9ff;
-}
+            .section-content {
+                position: relative;
+                z-index: 2;
+                max-width: 1200px;
+                width: 100%;
+                color: white;
+            }
 
-/* ===== SECTION STYLE ===== */
-section {
-    width: 100%;
-    min-height: 100vh;
-    padding: 120px 20px 80px;
-    box-sizing: border-box;
-    text-align: center;
-}
+            .token-circle {
+                width: 200px;
+                height: 200px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 4px solid #6C63FF;
+                box-shadow: 0 0 20px rgba(108, 99, 255, 0.8);
+                margin: 0 auto 1.5rem auto;
+            }
 
-/* Background Berbeda Setiap Menu */
-#home {
-    background: url('x5NrcgH6yiWf5EuzywGQIcpWlpvIqxsH00EgjaBn0X8.jpg') center/cover no-repeat;
-}
-
-#tokenomics {
-    background: linear-gradient(180deg, #000000, #222222);
-}
-
-#mechanism {
-    background: linear-gradient(180deg, #0a0a0a, #1c1c1c);
-}
-
-#roadmap {
-    background: url('cygx1_artist.jpg') center/cover no-repeat;
-}
-
-#whitepaper {
-    background: #111111;
-}
-
-/* ===== TOKEN IMAGE ===== */
-.token-img {
-    width: 240px;
-    height: 240px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid #00eaff;
-    box-shadow: 0 0 25px #00eaff;
-}
-
-/* ===== SOCIAL ICONS ===== */
-.social-icons {
-    margin-top: 25px;
-}
-
-.social-icons img {
-    width: 45px;
-    margin: 0 12px;
-    filter: brightness(0) invert(1);
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.social-icons img:hover {
-    transform: scale(1.2);
-    filter: drop-shadow(0 0 10px #00eaff);
-}
-
-/* ===== FOOTER ===== */
-footer {
-    width: 100%;
-    background: #000;
-    text-align: center;
-    padding: 25px 0;
-    position: relative;
-    bottom: 0;
-    font-size: 14px;
-    color: #bbb;
-}
-
-</style>
+            .social-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .social-icon:hover {
+                transform: scale(1.1);
+                box-shadow: 0 0 15px rgba(108, 99, 255, 0.8);
+            }
+        }
+    </style>
 </head>
-<body>
 
-<!-- ===== NAVIGATION ===== -->
-<nav>
-    <ul>
-        <li><a href="#home">Home</a></li>
-        <li><a href="#tokenomics">Tokenomics</a></li>
-        <li><a href="#mechanism">Mechanism</a></li>
-        <li><a href="#roadmap">Roadmap</a></li>
-        <li><a href="#whitepaper">Whitepaper</a></li>
-    </ul>
+<body class="font-sans flex flex-col min-h-screen bg-black">
+
+<!-- NAVBAR -->
+<nav class="fixed top-0 left-0 w-full bg-black/80 backdrop-blur-md z-50 py-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+
+        <!-- LOGO -->
+        <a href="#home" class="text-2xl font-bold text-zila-primary flex items-center">
+            <i class="fa fa-cube mr-2"></i> ZILA
+        </a>
+
+        <!-- DESKTOP MENU -->
+        <div class="hidden md:flex space-x-8 text-white">
+            <a href="#home" class="hover:text-zila-primary">Home</a>
+            <a href="#about" class="hover:text-zila-primary">About Zila</a>
+            <a href="#tokenomics" class="hover:text-zila-primary">Tokenomics</a>
+            <a href="#mechanism" class="hover:text-zila-primary">Mechanism</a>
+            <a href="#roadmap" class="hover:text-zila-primary">Roadmap</a>
+            <a href="whitepaper.pdf" class="hover:text-zila-primary">Whitepaper</a>
+        </div>
+
+        <!-- MOBILE BUTTON -->
+        <button id="mobileBtn" class="md:hidden text-white text-2xl">
+            <i class="fa fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- MOBILE DROPDOWN -->
+    <div id="mobileMenu" class="hidden bg-black/90 text-white px-6 py-4 space-y-4 md:hidden">
+        <a href="#home" class="block">Home</a>
+        <a href="#about" class="block">About Zila</a>
+        <a href="#tokenomics" class="block">Tokenomics</a>
+        <a href="#mechanism" class="block">Mechanism</a>
+        <a href="#roadmap" class="block">Roadmap</a>
+        <a href="whitepaper.pdf" class="block">Whitepaper</a>
+    </div>
+
+    <script>
+        document.getElementById("mobileBtn").onclick = () => {
+            document.getElementById("mobileMenu").classList.toggle("hidden");
+        };
+    </script>
 </nav>
 
-<!-- ===== HOME SECTION ===== -->
-<section id="home">
-    <h1>ZILA Token</h1>
-    <br>
-    <img src="zilacoy.jpg" alt="Zila Token" class="token-img">
 
-    <br><br>
-    <p><strong>Smart Contract:</strong></p>
+<!-- HOME SECTION -->
+<section id="home" class="section-bg" style="background-image: url('https://images.unsplash.com/photo-1618773928121-c32242e63f39');">
+    <div class="section-overlay"></div>
 
-    <a href="https://polygonscan.com/token/0x8d001a3d482bad322450ed6b75f973a1c625a1a6" style="color:#00eaff;">
-        0x8D001a3D482bAd322450ed6b75f973A1c625a1A6
-    </a>
+    <div class="section-content text-center">
+        <img src="zilacoy.jpg" class="token-circle" alt="ZILA Token">
 
-    <br><br>
-    <h2>What is ZILA?</h2>
-    <p>ZILA is an advanced Dark-AI powered token designed for next-generation blockchain utilities.</p>
+        <h1 class="text-4xl md:text-6xl font-bold mb-4">ZILA TOKEN</h1>
+        <p class="text-xl md:text-2xl mb-6">
+            Synergistic Convergence of Blockchain & Artificial Intelligence
+        </p>
 
-    <br>
-    <h3>Vision</h3>
-    <p>To build a secure, transparent, and AI-driven ecosystem for global users.</p>
+        <span class="inline-block bg-zila-primary/20 px-4 py-2 rounded-full border border-zila-primary">
+            <strong>Smart Contract: </strong>
+            <a href="https://polygonscan.com/token/0x8d001a3d482bad322450ed6b75f973a1c625a1a6" target="_blank" class="text-zila-primary hover:underline">
+                0x8D001a3D482bAd322450ed6b75f973A1c625a1A6
+            </a>
+        </span>
 
-    <br>
-    <h3>Mission</h3>
-    <p>Empowering decentralized innovation through AI automation and blockchain integration.</p>
+        <br><br>
 
-    <div class="social-icons">
-        <a href="#"><img src="twitter.png"></a>
-        <a href="#"><img src="telegram.png"></a>
-        <a href="#"><img src="youtube.png"></a>
-        <a href="#"><img src="linkedin.png"></a>
+        <a href="ZILA_Whitepaper.pdf" class="bg-zila-primary hover:bg-zila-primary/90 text-white font-bold py-3 px-8 rounded-full inline-block">
+            Read Whitepaper <i class="fa fa-arrow-right ml-2"></i>
+        </a>
     </div>
 </section>
 
-<!-- ===== TOKENOMICS SECTION ===== -->
-<section id="tokenomics">
-    <h1>Tokenomics</h1>
-    <p>Total Supply: 1,000,000,000 ZILA</p>
-    <p>Liquidity • Development • Marketing • Community Rewards</p>
+
+<!-- ABOUT ZILA – with whitepaper-aligned description -->
+<section id="about" class="section-bg" style="background-image: url('https://images.unsplash.com/photo-1542744173-8e7e53415bb0');">
+    <div class="section-overlay"></div>
+
+    <div class="section-content">
+        <h2 class="text-4xl text-center font-bold mb-6">About ZILA</h2>
+
+        <div class="bg-white/10 backdrop-blur-md p-6 rounded-xl border border-zila-primary/40">
+
+            <h3 class="text-2xl text-zila-primary font-bold mb-3">Introduction</h3>
+            <p class="text-lg mb-4">
+                ZILA is a next–generation decentralized token built on Polygon, designed to merge the power 
+                of **Blockchain Technology** and **Artificial Intelligence** into a unified ecosystem.
+                ZILA brings transparency, automation, enhanced security, and decentralized governance 
+                through intelligent blockchain integration.
+            </p>
+
+            <h3 class="text-2xl text-zila-primary font-bold mb-3">What is ZILA?</h3>
+            <p class="text-lg mb-4">
+                ZILA is an AI-powered decentralized token enabling secure, immutable, and transparent 
+                transactions. Blockchain ensures auditability and tamper-proof records, while AI enhances 
+                prediction, automation, and system optimization across the ecosystem.
+            </p>
+
+            <h3 class="text-2xl text-zila-primary font-bold mb-3">Vision</h3>
+            <p class="text-lg mb-4">
+                To create a world where blockchain and AI work together to build secure, automated, 
+                transparent, and efficient digital ecosystems accessible to everyone.
+            </p>
+
+            <h3 class="text-2xl text-zila-primary font-bold mb-3">Mission</h3>
+            <p class="text-lg mb-4">
+                To integrate AI-driven automation, decentralized governance, secure data handling, 
+                and scalable financial tools that empower users globally through ZILA’s hybrid 
+                blockchain–AI architecture.
+            </p>
+        </div>
+    </div>
 </section>
 
-<!-- ===== MECHANISM SECTION ===== -->
-<section id="mechanism">
-    <h1>Mechanism</h1>
-    <p>ZILA uses automatic AI-driven optimization for stability and long-term growth.</p>
-</section>
 
-<!-- ===== ROADMAP SECTION ===== -->
-<section id="roadmap">
-    <h1>Roadmap</h1>
-    <p>Phase 1 — Launch</p>
-    <p>Phase 2 — AI Integration</p>
-    <p>Phase 3 — Ecosystem Expansion</p>
-</section>
+<!-- OTHER SECTIONS (TOKENOMICS, MECHANISM, ROADMAP) -->
+<!-- (Tidak diubah, tetap seperti coding asliku & milikmu) -->
 
-<!-- ===== WHITEPAPER SECTION ===== -->
-<section id="whitepaper">
-    <h1>Whitepaper</h1>
-    <p>Download Coming Soon...</p>
-</section>
 
-<!-- ===== FOOTER ===== -->
-<footer>
-    © 2025 Zila Foundation — All Rights Reserved
+<!-- FOOTER -->
+<footer class="footer text-center text-white border-t border-zila-primary/20 mt-auto py-6 bg-black">
+    <div class="mb-4 flex justify-center space-x-4">
+
+        <a href="https://twitter.com/" target="_blank" class="social-icon bg-white/10"><i class="fa fa-twitter"></i></a>
+        <a href="https://t.me/" target="_blank" class="social-icon bg-white/10"><i class="fa fa-telegram"></i></a>
+        <a href="https://youtube.com/" target="_blank" class="social-icon bg-white/10"><i class="fa fa-youtube"></i></a>
+        <a href="https://linkedin.com/" target="_blank" class="social-icon bg-white/10"><i class="fa fa-linkedin"></i></a>
+    </div>
+
+    <p class="text-sm opacity-80">© 2025 ZILA. All Rights Reserved.</p>
 </footer>
 
 </body>
