@@ -1,61 +1,243 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>ZILA Vesting Claim</title>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.1/dist/ethers.umd.min.js"></script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ZILA — Vesting Claim</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+
+<style>
+:root{
+  --bg:#050508;
+  --purple:#7c5cff;
+  --soft:#b5b5c7;
+}
+*{box-sizing:border-box;font-family:Inter}
+body{
+  margin:0;
+  background:radial-gradient(1200px 800px at 50% 20%,#120f1f,#050508 60%);
+  color:#fff;
+  text-align:center;
+  overflow-x:hidden;
+}
+.nav{
+  padding:18px 22px;
+  font-weight:700;
+  letter-spacing:2px;
+  color:var(--purple);
+}
+.hero{
+  padding:30px 20px;
+}
+
+/* 3D hero */
+.scene{perspective:1000px;margin-bottom:20px}
+.card3d{
+  width:200px;height:260px;margin:0 auto 20px;
+  border-radius:18px;
+  background:radial-gradient(circle at 30% 20%,#a98bff55,#2a1140 45%,#050508 80%);
+  box-shadow:0 0 40px #7c5cff66;
+  display:flex;align-items:center;justify-content:center;
+  transform-style:preserve-3d;
+  transition:.1s ease;
+}
+.core{
+  width:110px;height:110px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,#fff,#7c5cff 35%,#3a1c6e 70%);
+  box-shadow:inset 0 0 20px #fff55,0 0 35px #7c5cffaa;
+  transform:translateZ(50px);
+  animation:float 5s ease-in-out infinite;
+}
+@keyframes float{
+  0%,100%{transform:translateZ(50px) translateY(0)}
+  50%{transform:translateZ(50px) translateY(-10px)}
+}
+
+.card{
+  max-width:380px;margin:0 auto;
+  background:#0b0a13;
+  border-radius:18px;
+  padding:26px;
+  box-shadow:0 0 40px #7c5cff33;
+}
+h1{margin:8px 0 6px;font-size:26px}
+p{color:var(--soft);font-size:14px}
+
+.btn{
+  width:100%;padding:14px;
+  border-radius:14px;margin-top:12px;
+  font-weight:600;border:none;
+}
+.primary{
+  background:linear-gradient(90deg,#ff9f1c,#ff3d81);
+  color:#fff;
+}
+.outline{
+  background:transparent;
+  border:1px solid var(--purple);
+  color:#fff;
+}
+
+.data{margin-top:10px;font-size:13px;color:#a98bff}
+
+/* Progress */
+.bar{
+  margin-top:12px;
+  background:#1a1830;
+  border-radius:10px;
+  overflow:hidden;
+}
+.bar-fill{
+  height:10px;width:0%;
+  background:linear-gradient(90deg,#7c5cff,#ff3d81);
+  transition:width .6s ease;
+}
+
+/* History */
+.history{
+  margin-top:14px;
+  max-height:120px;
+  overflow:auto;
+  text-align:left;
+  font-size:12px;
+}
+.history div{
+  padding:6px 0;
+  border-bottom:1px solid #ffffff10;
+}
+</style>
 </head>
 
-<body style="font-family: Arial; background:#0b0b0b; color:#fff; padding:40px">
+<body>
 
-  <h2>ZILA Vesting Claim</h2>
+<div class="nav">ZILA</div>
 
-  <button id="connect">Connect Wallet</button>
-  <p id="wallet"></p>
+<div class="hero">
+  <div class="scene">
+    <div class="card3d" id="tilt">
+      <div class="core"></div>
+    </div>
+  </div>
 
-  <button id="check">Check Claimable</button>
-  <p id="claimable"></p>
+  <h1>Claim ZILA Vesting</h1>
+  <p>On-chain vesting · Self custody · Transparent</p>
 
-  <button id="claim">Claim Tokens</button>
-  <p id="status"></p>
+  <div class="card">
+    <button id="connect" class="btn outline">Connect Wallet</button>
+    <div class="data" id="wallet"></div>
+
+    <div class="data" id="claimable">Claimable: -</div>
+    <div class="bar"><div class="bar-fill" id="progress"></div></div>
+    <div class="data" id="progressText">Vested: 0%</div>
+
+    <div class="data" id="detail"></div>
+
+    <button id="claim" class="btn primary">Claim Vesting</button>
+    <div class="data" id="cooldown"></div>
+    <div class="data" id="status"></div>
+
+    <div class="history" id="history"></div>
+  </div>
+</div>
 
 <script>
-const CONTRACT_ADDRESS = "0xYOUR_CONTRACT_ADDRESS";
+/* ================= CONFIG ================= */
+const CONTRACT_ADDRESS = "0x1b300ACFe7832121bF5E04675Da5B1f62d3Eb180";
+const CHAIN_ID = 137;
+const COOLDOWN = 60;
+
+/* ================= ABI ================= */
 const ABI = [
-  "function claim() external",
-  "function claimable(address) view returns (uint256)"
+  "function claim()",
+  "function vestedAmount(address) view returns (uint256)",
+  "function vestings(address) view returns (uint256 total,uint256 claimed,uint256 start,uint256 duration)",
+  "event Transfer(address indexed from,address indexed to,uint256 value)"
 ];
 
 let provider, signer, contract, user;
+let lastClaim = 0;
 
-document.getElementById("connect").onclick = async () => {
-  if (!window.ethereum) return alert("Install MetaMask");
+const el = id => document.getElementById(id);
 
+/* ================= WALLET ================= */
+el("connect").onclick = async()=>{
+  if(!window.ethereum) return alert("Install wallet");
   provider = new ethers.BrowserProvider(window.ethereum);
-  await provider.send("eth_requestAccounts", []);
+  await provider.send("eth_requestAccounts",[]);
   signer = await provider.getSigner();
   user = await signer.getAddress();
 
-  contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-  document.getElementById("wallet").innerText = "Connected: " + user;
+  const net = await provider.getNetwork();
+  if(Number(net.chainId)!==CHAIN_ID){
+    await window.ethereum.request({
+      method:"wallet_switchEthereumChain",
+      params:[{chainId:"0x"+CHAIN_ID.toString(16)}]
+    });
+  }
+
+  contract = new ethers.Contract(CONTRACT_ADDRESS,ABI,signer);
+  el("wallet").innerText="Connected: "+user.slice(0,6)+"..."+user.slice(-4);
+  loadData(); loadHistory();
 };
 
-document.getElementById("check").onclick = async () => {
-  const amount = await contract.claimable(user);
-  document.getElementById("claimable").innerText =
-    "Claimable: " + ethers.formatUnits(amount, 18) + " ZILA";
-};
+/* ================= DATA ================= */
+async function loadData(){
+  const vested = await contract.vestedAmount(user);
+  const v = await contract.vestings(user);
+  const total = v.total;
+  const claimed = v.claimed;
+  const claimable = vested - claimed;
 
-document.getElementById("claim").onclick = async () => {
-  try {
-    document.getElementById("status").innerText = "Processing...";
+  const percent = total>0 ? Number(vested*100n/total) : 0;
+
+  el("claimable").innerText="Claimable: "+ethers.formatUnits(claimable,18)+" ZILA";
+  el("progress").style.width=percent+"%";
+  el("progressText").innerText="Vested: "+percent+"%";
+  el("detail").innerText=
+    "Claimed: "+ethers.formatUnits(claimed,18)+" / "+
+    ethers.formatUnits(total,18)+" ZILA";
+}
+
+/* ================= HISTORY ================= */
+async function loadHistory(){
+  const filter = contract.filters.Transfer(CONTRACT_ADDRESS,user);
+  const logs = await contract.queryFilter(filter,-3000);
+  el("history").innerHTML="<b>Claim History</b>";
+  logs.slice(-5).reverse().forEach(l=>{
+    el("history").innerHTML+=
+      `<div>+ ${ethers.formatUnits(l.args.value,18)} ZILA</div>`;
+  });
+}
+
+/* ================= CLAIM ================= */
+el("claim").onclick = async()=>{
+  const now = Date.now()/1000;
+  if(now-lastClaim<COOLDOWN){
+    el("cooldown").innerText=
+      "⏳ Wait "+Math.ceil(COOLDOWN-(now-lastClaim))+"s";
+    return;
+  }
+  try{
+    el("status").innerText="Claiming...";
     const tx = await contract.claim();
     await tx.wait();
-    document.getElementById("status").innerText = "Claim success!";
-  } catch (e) {
-    document.getElementById("status").innerText = "Error / Rejected";
+    lastClaim = Date.now()/1000;
+    el("status").innerText="✅ Claim success";
+    loadData(); loadHistory();
+  }catch{
+    el("status").innerText="❌ Failed";
   }
 };
+
+/* ================= 3D TILT ================= */
+const tilt=document.getElementById("tilt");
+document.addEventListener("mousemove",e=>{
+  const x=(e.clientX/window.innerWidth-.5)*16;
+  const y=(e.clientY/window.innerHeight-.5)*-16;
+  tilt.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`;
+});
 </script>
 
 </body>
