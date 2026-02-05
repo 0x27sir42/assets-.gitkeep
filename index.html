@@ -7,6 +7,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <style>
 :root{
@@ -17,12 +18,22 @@
 *{box-sizing:border-box;font-family:Inter}
 body{
   margin:0;
-  background:radial-gradient(1200px 800px at 50% 20%,#120f1f,#050508 60%);
+  background:#050508;
   color:#fff;
   text-align:center;
+  overflow-x:hidden;
 }
+
+/* ===== THREE BACKGROUND ===== */
+#bg{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+}
+
+/* ===== NAV ===== */
 .nav{
-  padding:16px;
+  padding:16px 20px;
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -34,15 +45,56 @@ body{
   text-decoration:none;
   font-size:13px;
 }
-.hero{padding:30px 20px}
+
+/* ===== HERO ===== */
+.hero{
+  padding:30px 20px 60px;
+}
 .card{
   max-width:420px;
   margin:0 auto;
   background:#0b0a13;
   padding:26px;
   border-radius:18px;
-  box-shadow:0 0 40px #7c5cff33;
+  box-shadow:0 0 60px #7c5cff33;
+  transform:translateY(40px);
+  opacity:0;
+  animation:fadeUp 1s ease forwards;
 }
+
+@keyframes fadeUp{
+  to{transform:none;opacity:1}
+}
+
+/* ===== VESTING VISUAL ===== */
+.vesting-visual{
+  position:relative;
+  margin:10px auto 20px;
+  width:180px;
+  height:260px;
+  perspective:800px;
+}
+.vesting-visual img{
+  width:100%;
+  border-radius:14px;
+  transform:rotateX(6deg) rotateY(-6deg);
+  animation:float 6s ease-in-out infinite;
+}
+.vesting-glow{
+  position:absolute;
+  inset:-40px;
+  background:radial-gradient(circle,var(--purple),transparent 70%);
+  filter:blur(40px);
+  opacity:.4;
+  transition:.4s;
+  z-index:-1;
+}
+
+@keyframes float{
+  0%,100%{transform:translateY(0) rotateX(6deg) rotateY(-6deg)}
+  50%{transform:translateY(-14px) rotateX(4deg) rotateY(-4deg)}
+}
+
 h1{font-size:26px;margin:6px 0}
 p{font-size:14px;color:var(--soft)}
 .badge{
@@ -53,6 +105,7 @@ p{font-size:14px;color:var(--soft)}
   margin-bottom:10px;
   font-size:13px;
 }
+
 .btn{
   width:100%;
   padding:14px;
@@ -63,16 +116,40 @@ p{font-size:14px;color:var(--soft)}
 }
 .primary{background:linear-gradient(90deg,#ff9f1c,#ff3d81);color:#fff}
 .outline{background:transparent;border:1px solid var(--purple);color:#fff}
+
 .bar{background:#1a1830;border-radius:10px;overflow:hidden;margin-top:10px}
 .bar-fill{height:10px;width:0%;background:linear-gradient(90deg,#7c5cff,#ff3d81)}
 .data{font-size:13px;margin-top:8px;color:#a98bff}
 .lock{color:#ff6b6b;font-weight:600;margin-top:10px}
-.history{text-align:left;font-size:12px;margin-top:10px;max-height:120px;overflow:auto}
-.history div{padding:4px 0;border-bottom:1px solid #ffffff10}
+
+.history{
+  text-align:left;
+  font-size:12px;
+  margin-top:12px;
+  max-height:120px;
+  overflow:auto;
+}
+.history div{
+  padding:4px 0;
+  border-bottom:1px solid #ffffff10;
+}
+
+/* ===== SCROLL ARROW ===== */
+.scroll{
+  margin-top:20px;
+  animation:bounce 1.5s infinite;
+  color:#7c5cff;
+}
+@keyframes bounce{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(8px)}
+}
 </style>
 </head>
 
 <body>
+
+<canvas id="bg"></canvas>
 
 <div class="nav">
   <div class="logo">ZILA</div>
@@ -86,8 +163,15 @@ p{font-size:14px;color:var(--soft)}
 
 <div class="hero">
   <div class="card">
+
+    <!-- VISUAL -->
+    <div class="vesting-visual">
+      <div class="vesting-glow" id="glow"></div>
+      <img id="heroImg">
+    </div>
+
     <div class="badge" id="role">Detecting role...</div>
-    <h1 id="title">ZILA Vesting</h1>
+    <h1>ZILA Vesting</h1>
     <p id="desc">Connect wallet to continue</p>
 
     <button class="btn outline" id="connect">Connect Wallet</button>
@@ -102,11 +186,13 @@ p{font-size:14px;color:var(--soft)}
     <div class="lock" id="lock"></div>
 
     <div class="history" id="history"></div>
+
+    <div class="scroll">⌄</div>
   </div>
 </div>
 
 <script>
-/* ===== CONFIG ===== */
+/* ================= CONFIG ================= */
 const CONTRACT_ADDRESS = "0xYOUR_CONTRACT_ADDRESS";
 const CHAIN_ID = 137;
 
@@ -114,16 +200,18 @@ const TEAM_WALLET    = "0xTEAM_WALLET";
 const PRESALE_WALLET = "0xPRESALE_WALLET";
 const PRIVATE_WALLET = "0xPRIVATE_WALLET";
 
-const WEBSITE_URL = "https://zila.ai";
-const TWITTER_URL = "https://x.com/zilafondation";
-const TG_CHANNEL  = "https://t.me/zilatoken";
-const TG_GROUP    = "https://t.me/zila_group";
+web.href="https://zila.ai";
+tw.href="https://x.com/zilafoundation";
+tgch.href="https://t.me/zilatoken";
+tgg.href="https://t.me/zila_group";
 
-/* ===== SOCIAL ===== */
-web.href=WEBSITE_URL;
-tw.href=TWITTER_URL;
-tgch.href=TG_CHANNEL;
-tgg.href=TG_GROUP;
+/* ===== ROLE IMAGE ===== */
+const images={
+  TEAM:"https://i.imgur.com/TEAM.png",
+  PRESALE:"https://i.imgur.com/PRESALE.png",
+  PRIVATE:"https://i.imgur.com/PRIVATE.png",
+  PUBLIC:"https://i.imgur.com/PUBLIC.png"
+};
 
 /* ===== ABI ===== */
 const ABI=[
@@ -134,18 +222,9 @@ const ABI=[
 ];
 
 let provider,signer,contract,user;
-const path=location.pathname;
-
-/* ===== ROUTE ROLE ===== */
-let expectedRole=null;
-if(path==="/team") expectedRole="TEAM";
-if(path==="/presale") expectedRole="PRESALE";
-if(path==="/private") expectedRole="PRIVATE";
-if(path==="/admin") expectedRole="ADMIN";
 
 /* ===== CONNECT ===== */
 connect.onclick=async()=>{
-  if(!window.ethereum) return alert("Install wallet");
   provider=new ethers.BrowserProvider(window.ethereum);
   await provider.send("eth_requestAccounts",[]);
   signer=await provider.getSigner();
@@ -153,21 +232,22 @@ connect.onclick=async()=>{
   contract=new ethers.Contract(CONTRACT_ADDRESS,ABI,signer);
 
   wallet.innerText="Connected: "+user.slice(0,6)+"..."+user.slice(-4);
-
   detectRole();
   loadData();
   loadHistory();
 };
 
-/* ===== ROLE DETECT ===== */
+/* ===== ROLE ===== */
 function detectRole(){
-  let role="Public";
+  let role="PUBLIC";
   if(user.toLowerCase()===TEAM_WALLET.toLowerCase()) role="TEAM";
   if(user.toLowerCase()===PRESALE_WALLET.toLowerCase()) role="PRESALE";
   if(user.toLowerCase()===PRIVATE_WALLET.toLowerCase()) role="PRIVATE";
-  document.getElementById("role").innerText=role;
 
-  if(expectedRole && role!==expectedRole && expectedRole!=="ADMIN"){
+  document.getElementById("role").innerText=role;
+  heroImg.src=images[role];
+
+  if(location.pathname!="/" && !location.pathname.includes(role.toLowerCase())){
     lock.innerText="❌ Wrong wallet for this page";
     claim.disabled=true;
   }
@@ -177,21 +257,21 @@ function detectRole(){
 async function loadData(){
   const vested=await contract.vestedAmount(user);
   const v=await contract.vestings(user);
-  const claimable=vested-v[1];
+  const claimableAmt=vested-v[1];
   const percent=v[0]>0?Number(vested*100n/v[0]):0;
 
-  claimable.innerText="Claimable: "+ethers.formatUnits(claimable,18)+" ZILA";
+  claimable.innerText="Claimable: "+ethers.formatUnits(claimableAmt,18)+" ZILA";
   progress.style.width=percent+"%";
   progressText.innerText="Vested: "+percent+"%";
+
+  glow.style.opacity=Math.min(.9,percent/100+.2);
 }
 
 /* ===== CLAIM ===== */
 claim.onclick=async()=>{
-  try{
-    const tx=await contract.claim();
-    await tx.wait();
-    loadData(); loadHistory();
-  }catch(e){ alert("Claim failed"); }
+  const tx=await contract.claim();
+  await tx.wait();
+  loadData();loadHistory();
 };
 
 /* ===== HISTORY ===== */
@@ -202,6 +282,26 @@ async function loadHistory(){
     history.innerHTML+=`<div>+ ${ethers.formatUnits(l.args[1],18)} ZILA</div>`;
   });
 }
+
+/* ===== THREE.JS ORB ===== */
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,100);
+cam.position.z=5;
+
+const renderer=new THREE.WebGLRenderer({canvas:bg,alpha:true});
+renderer.setSize(innerWidth,innerHeight);
+
+const geo=new THREE.TorusGeometry(1.2,.25,32,100);
+const mat=new THREE.MeshBasicMaterial({color:0x7c5cff,wireframe:true});
+const torus=new THREE.Mesh(geo,mat);
+scene.add(torus);
+
+(function animate(){
+  requestAnimationFrame(animate);
+  torus.rotation.x+=0.003;
+  torus.rotation.y+=0.002;
+  renderer.render(scene,cam);
+})();
 </script>
 
 </body>
