@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ZILA — Vesting Claim</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZILA Vesting Portal</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
@@ -20,224 +20,188 @@ body{
   background:radial-gradient(1200px 800px at 50% 20%,#120f1f,#050508 60%);
   color:#fff;
   text-align:center;
-  overflow-x:hidden;
 }
 .nav{
-  padding:18px 22px;
-  font-weight:700;
-  letter-spacing:2px;
-  color:var(--purple);
+  padding:16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-.hero{
-  padding:30px 20px;
+.logo{color:var(--purple);font-weight:700;letter-spacing:2px}
+.links a{
+  color:#fff;
+  margin-left:12px;
+  text-decoration:none;
+  font-size:13px;
 }
-
-/* 3D hero */
-.scene{perspective:1000px;margin-bottom:20px}
-.card3d{
-  width:200px;height:260px;margin:0 auto 20px;
-  border-radius:18px;
-  background:radial-gradient(circle at 30% 20%,#a98bff55,#2a1140 45%,#050508 80%);
-  box-shadow:0 0 40px #7c5cff66;
-  display:flex;align-items:center;justify-content:center;
-  transform-style:preserve-3d;
-  transition:.1s ease;
-}
-.core{
-  width:110px;height:110px;border-radius:50%;
-  background:radial-gradient(circle at 30% 30%,#fff,#7c5cff 35%,#3a1c6e 70%);
-  box-shadow:inset 0 0 20px #fff55,0 0 35px #7c5cffaa;
-  transform:translateZ(50px);
-  animation:float 5s ease-in-out infinite;
-}
-@keyframes float{
-  0%,100%{transform:translateZ(50px) translateY(0)}
-  50%{transform:translateZ(50px) translateY(-10px)}
-}
-
+.hero{padding:30px 20px}
 .card{
-  max-width:380px;margin:0 auto;
+  max-width:420px;
+  margin:0 auto;
   background:#0b0a13;
-  border-radius:18px;
   padding:26px;
+  border-radius:18px;
   box-shadow:0 0 40px #7c5cff33;
 }
-h1{margin:8px 0 6px;font-size:26px}
-p{color:var(--soft);font-size:14px}
-
+h1{font-size:26px;margin:6px 0}
+p{font-size:14px;color:var(--soft)}
+.badge{
+  display:inline-block;
+  padding:6px 12px;
+  border-radius:12px;
+  background:#7c5cff33;
+  margin-bottom:10px;
+  font-size:13px;
+}
 .btn{
-  width:100%;padding:14px;
-  border-radius:14px;margin-top:12px;
-  font-weight:600;border:none;
-}
-.primary{
-  background:linear-gradient(90deg,#ff9f1c,#ff3d81);
-  color:#fff;
-}
-.outline{
-  background:transparent;
-  border:1px solid var(--purple);
-  color:#fff;
-}
-
-.data{margin-top:10px;font-size:13px;color:#a98bff}
-
-/* Progress */
-.bar{
+  width:100%;
+  padding:14px;
   margin-top:12px;
-  background:#1a1830;
-  border-radius:10px;
-  overflow:hidden;
+  border-radius:14px;
+  border:none;
+  font-weight:600;
 }
-.bar-fill{
-  height:10px;width:0%;
-  background:linear-gradient(90deg,#7c5cff,#ff3d81);
-  transition:width .6s ease;
-}
-
-/* History */
-.history{
-  margin-top:14px;
-  max-height:120px;
-  overflow:auto;
-  text-align:left;
-  font-size:12px;
-}
-.history div{
-  padding:6px 0;
-  border-bottom:1px solid #ffffff10;
-}
+.primary{background:linear-gradient(90deg,#ff9f1c,#ff3d81);color:#fff}
+.outline{background:transparent;border:1px solid var(--purple);color:#fff}
+.bar{background:#1a1830;border-radius:10px;overflow:hidden;margin-top:10px}
+.bar-fill{height:10px;width:0%;background:linear-gradient(90deg,#7c5cff,#ff3d81)}
+.data{font-size:13px;margin-top:8px;color:#a98bff}
+.lock{color:#ff6b6b;font-weight:600;margin-top:10px}
+.history{text-align:left;font-size:12px;margin-top:10px;max-height:120px;overflow:auto}
+.history div{padding:4px 0;border-bottom:1px solid #ffffff10}
 </style>
 </head>
 
 <body>
 
-<div class="nav">ZILA</div>
+<div class="nav">
+  <div class="logo">ZILA</div>
+  <div class="links">
+    <a id="web" target="_blank">Website</a>
+    <a id="tw" target="_blank">X</a>
+    <a id="tgch" target="_blank">Telegram</a>
+    <a id="tgg" target="_blank">Group</a>
+  </div>
+</div>
 
 <div class="hero">
-  <div class="scene">
-    <div class="card3d" id="tilt">
-      <div class="core"></div>
-    </div>
-  </div>
-
-  <h1>Claim ZILA Vesting</h1>
-  <p>On-chain vesting · Self custody · Transparent</p>
-
   <div class="card">
-    <button id="connect" class="btn outline">Connect Wallet</button>
+    <div class="badge" id="role">Detecting role...</div>
+    <h1 id="title">ZILA Vesting</h1>
+    <p id="desc">Connect wallet to continue</p>
+
+    <button class="btn outline" id="connect">Connect Wallet</button>
+
     <div class="data" id="wallet"></div>
+    <div class="data" id="claimable"></div>
 
-    <div class="data" id="claimable">Claimable: -</div>
     <div class="bar"><div class="bar-fill" id="progress"></div></div>
-    <div class="data" id="progressText">Vested: 0%</div>
+    <div class="data" id="progressText"></div>
 
-    <div class="data" id="detail"></div>
-
-    <button id="claim" class="btn primary">Claim Vesting</button>
-    <div class="data" id="cooldown"></div>
-    <div class="data" id="status"></div>
+    <button class="btn primary" id="claim">Claim Vesting</button>
+    <div class="lock" id="lock"></div>
 
     <div class="history" id="history"></div>
   </div>
 </div>
 
 <script>
-/* ================= CONFIG ================= */
-const CONTRACT_ADDRESS = "0x1b300ACFe7832121bF5E04675Da5B1f62d3Eb180";
+/* ===== CONFIG ===== */
+const CONTRACT_ADDRESS = "0xYOUR_CONTRACT_ADDRESS";
 const CHAIN_ID = 137;
-const COOLDOWN = 60;
 
-/* ================= ABI ================= */
-const ABI = [
+const TEAM_WALLET    = "0xTEAM_WALLET";
+const PRESALE_WALLET = "0xPRESALE_WALLET";
+const PRIVATE_WALLET = "0xPRIVATE_WALLET";
+
+const WEBSITE_URL = "https://zila.ai";
+const TWITTER_URL = "https://x.com/zilafondation";
+const TG_CHANNEL  = "https://t.me/zilatoken";
+const TG_GROUP    = "https://t.me/zila_group";
+
+/* ===== SOCIAL ===== */
+web.href=WEBSITE_URL;
+tw.href=TWITTER_URL;
+tgch.href=TG_CHANNEL;
+tgg.href=TG_GROUP;
+
+/* ===== ABI ===== */
+const ABI=[
   "function claim()",
-  "function vestedAmount(address) view returns (uint256)",
-  "function vestings(address) view returns (uint256 total,uint256 claimed,uint256 start,uint256 duration)",
-  "event Transfer(address indexed from,address indexed to,uint256 value)"
+  "function vestedAmount(address) view returns(uint256)",
+  "function vestings(address) view returns(uint256,uint256,uint256,uint256)",
+  "event VestingClaimed(address,uint256)"
 ];
 
-let provider, signer, contract, user;
-let lastClaim = 0;
+let provider,signer,contract,user;
+const path=location.pathname;
 
-const el = id => document.getElementById(id);
+/* ===== ROUTE ROLE ===== */
+let expectedRole=null;
+if(path==="/team") expectedRole="TEAM";
+if(path==="/presale") expectedRole="PRESALE";
+if(path==="/private") expectedRole="PRIVATE";
+if(path==="/admin") expectedRole="ADMIN";
 
-/* ================= WALLET ================= */
-el("connect").onclick = async()=>{
+/* ===== CONNECT ===== */
+connect.onclick=async()=>{
   if(!window.ethereum) return alert("Install wallet");
-  provider = new ethers.BrowserProvider(window.ethereum);
+  provider=new ethers.BrowserProvider(window.ethereum);
   await provider.send("eth_requestAccounts",[]);
-  signer = await provider.getSigner();
-  user = await signer.getAddress();
+  signer=await provider.getSigner();
+  user=await signer.getAddress();
+  contract=new ethers.Contract(CONTRACT_ADDRESS,ABI,signer);
 
-  const net = await provider.getNetwork();
-  if(Number(net.chainId)!==CHAIN_ID){
-    await window.ethereum.request({
-      method:"wallet_switchEthereumChain",
-      params:[{chainId:"0x"+CHAIN_ID.toString(16)}]
-    });
-  }
+  wallet.innerText="Connected: "+user.slice(0,6)+"..."+user.slice(-4);
 
-  contract = new ethers.Contract(CONTRACT_ADDRESS,ABI,signer);
-  el("wallet").innerText="Connected: "+user.slice(0,6)+"..."+user.slice(-4);
-  loadData(); loadHistory();
+  detectRole();
+  loadData();
+  loadHistory();
 };
 
-/* ================= DATA ================= */
-async function loadData(){
-  const vested = await contract.vestedAmount(user);
-  const v = await contract.vestings(user);
-  const total = v.total;
-  const claimed = v.claimed;
-  const claimable = vested - claimed;
+/* ===== ROLE DETECT ===== */
+function detectRole(){
+  let role="Public";
+  if(user.toLowerCase()===TEAM_WALLET.toLowerCase()) role="TEAM";
+  if(user.toLowerCase()===PRESALE_WALLET.toLowerCase()) role="PRESALE";
+  if(user.toLowerCase()===PRIVATE_WALLET.toLowerCase()) role="PRIVATE";
+  document.getElementById("role").innerText=role;
 
-  const percent = total>0 ? Number(vested*100n/total) : 0;
-
-  el("claimable").innerText="Claimable: "+ethers.formatUnits(claimable,18)+" ZILA";
-  el("progress").style.width=percent+"%";
-  el("progressText").innerText="Vested: "+percent+"%";
-  el("detail").innerText=
-    "Claimed: "+ethers.formatUnits(claimed,18)+" / "+
-    ethers.formatUnits(total,18)+" ZILA";
+  if(expectedRole && role!==expectedRole && expectedRole!=="ADMIN"){
+    lock.innerText="❌ Wrong wallet for this page";
+    claim.disabled=true;
+  }
 }
 
-/* ================= HISTORY ================= */
+/* ===== DATA ===== */
+async function loadData(){
+  const vested=await contract.vestedAmount(user);
+  const v=await contract.vestings(user);
+  const claimable=vested-v[1];
+  const percent=v[0]>0?Number(vested*100n/v[0]):0;
+
+  claimable.innerText="Claimable: "+ethers.formatUnits(claimable,18)+" ZILA";
+  progress.style.width=percent+"%";
+  progressText.innerText="Vested: "+percent+"%";
+}
+
+/* ===== CLAIM ===== */
+claim.onclick=async()=>{
+  try{
+    const tx=await contract.claim();
+    await tx.wait();
+    loadData(); loadHistory();
+  }catch(e){ alert("Claim failed"); }
+};
+
+/* ===== HISTORY ===== */
 async function loadHistory(){
-  const filter = contract.filters.Transfer(CONTRACT_ADDRESS,user);
-  const logs = await contract.queryFilter(filter,-3000);
-  el("history").innerHTML="<b>Claim History</b>";
-  logs.slice(-5).reverse().forEach(l=>{
-    el("history").innerHTML+=
-      `<div>+ ${ethers.formatUnits(l.args.value,18)} ZILA</div>`;
+  const logs=await contract.queryFilter(contract.filters.VestingClaimed(user),-2000);
+  history.innerHTML="<b>Claim History</b>";
+  logs.reverse().slice(0,5).forEach(l=>{
+    history.innerHTML+=`<div>+ ${ethers.formatUnits(l.args[1],18)} ZILA</div>`;
   });
 }
-
-/* ================= CLAIM ================= */
-el("claim").onclick = async()=>{
-  const now = Date.now()/1000;
-  if(now-lastClaim<COOLDOWN){
-    el("cooldown").innerText=
-      "⏳ Wait "+Math.ceil(COOLDOWN-(now-lastClaim))+"s";
-    return;
-  }
-  try{
-    el("status").innerText="Claiming...";
-    const tx = await contract.claim();
-    await tx.wait();
-    lastClaim = Date.now()/1000;
-    el("status").innerText="✅ Claim success";
-    loadData(); loadHistory();
-  }catch{
-    el("status").innerText="❌ Failed";
-  }
-};
-
-/* ================= 3D TILT ================= */
-const tilt=document.getElementById("tilt");
-document.addEventListener("mousemove",e=>{
-  const x=(e.clientX/window.innerWidth-.5)*16;
-  const y=(e.clientY/window.innerHeight-.5)*-16;
-  tilt.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`;
-});
 </script>
 
 </body>
